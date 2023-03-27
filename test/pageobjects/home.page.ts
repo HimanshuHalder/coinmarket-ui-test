@@ -6,9 +6,6 @@ import {browser} from "@wdio/globals";
 **/
 class HomePage extends Page{
 
-    public get tableElemnt(){
-        return $$('//table[@class="sc-beb003d5-3 ieTeVa cmc-table  "]/tbody/tr');
-    }
     public get closeCookiePopup(){
         return $('//div[@class="cmc-cookie-policy-banner__close"]');
     }
@@ -26,6 +23,18 @@ class HomePage extends Page{
 
     public get selectAlgorithmType(){
         return $('//input[@class="sc-ecd5a54c-1 hCwYVK cmc-input"]');
+    }
+
+    public get tableElemnt(){
+        return $$('//table[@class="sc-beb003d5-3 ieTeVa cmc-table  "]/tbody/tr');
+    }
+
+    public get paginationTab(){
+        return $$('//div[@class="sc-18df06a5-3 hiNKNZ"]//ul//li[@class="page" or  @class="page active"]');
+    }
+
+    public get numberOfRecord(){
+        return $('//div[@class="sc-aef7b723-0 sc-18df06a5-0 hBoqvQ"]/p');
     }
 
     public async filterRecordsByRow(row: string){
@@ -73,7 +82,19 @@ class HomePage extends Page{
         await expect(tableData).toBeExisting();
     }
 
+    public async numberOfPaginationTab(){
+        browser.scroll(0, 500);
+        browser.pause(2000);
+        var tabCount = await this.paginationTab.length;
+        var pageCount = await $('//div[@class="sc-18df06a5-3 hiNKNZ"]//ul//li[@class=\'page\' or  @class="page active"]['+tabCount+']').getText();
+        console.log("Page count ========>>>" + pageCount);
+        browser.scroll(0, 0);
+        browser.pause(2000);
+    }
+
     public async printCryptoTableData(){
+        var recordCountData = await this.numberOfRecord.getText();
+        console.log("Total number of records present == > " + recordCountData.replace('Showing 1 - 20 out of ', ''));
         var coinMap = new Map();
         browser.scroll(0, 1200);
         for(let i=1; i <= 20;i++){
@@ -81,9 +102,11 @@ class HomePage extends Page{
             var price = await await $('//tbody/tr['+i+']//a[@class="cmc-link"]/span').getText();
             coinMap.set(coinName, price);
         }
-        console.log(coinMap);
         browser.scroll(0, 0);
+        console.log("List of coin in 1st 20 row ===>");
+        return coinMap;
     }
+
     /**
     * overwrite specific options to adapt it to page object
     **/
